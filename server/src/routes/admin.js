@@ -140,7 +140,9 @@ adminRouter.put("/update-course", authenticateAdminJWT, async (req, res) => {
     const isCourseIdValid = mongoose.Types.ObjectId.isValid(updatedCourse._id);
     const isOwnerIdvalid = mongoose.Types.ObjectId.isValid(updatedCourse.owner);
     if (!(isCourseIdValid && isOwnerIdvalid)) {
-      return res.status(400).json({ message: "Course _id or owner id is not valid" })
+      return res
+        .status(400)
+        .json({ message: "Course _id or owner id is not valid" });
     }
     const courseData = await Course.findOne({ _id: updatedCourse._id });
     if (!courseData) {
@@ -148,8 +150,15 @@ adminRouter.put("/update-course", authenticateAdminJWT, async (req, res) => {
         .status(404)
         .json({ message: "Requested course does not exixts" });
     }
-    if (!((admin.id === updatedCourse.owner) && (updatedCourse.owner === courseData.owner))) {
-      return res.status(403).json({ message: "This course does not belong to this admin." });
+    if (
+      !(
+        admin.id === updatedCourse.owner &&
+        updatedCourse.owner === courseData.owner
+      )
+    ) {
+      return res
+        .status(403)
+        .json({ message: "This course does not belong to this admin." });
     }
     await Course.findByIdAndUpdate(updatedCourse._id, updatedCourse, {
       new: true,
@@ -167,13 +176,15 @@ adminRouter.delete("/delete-course", authenticateAdminJWT, async (req, res) => {
     const admin = await req.admin;
     const courseData = await Course.findById(courseId);
     if (!courseData) {
-      return res.status(403).json({ message: "Course does not exixts" })
+      return res.status(403).json({ message: "Course does not exixts" });
     }
     if (courseData.owner === admin.id) {
       await Course.findByIdAndDelete(courseId);
       return res.json({ message: "Course deleted successfully" });
     }
-    return res.status(403).json({ message: "This course does not belong to this admin." })
+    return res
+      .status(403)
+      .json({ message: "This course does not belong to this admin." });
   } catch (error) {
     console.log(error);
     res.sendStatus(500);
